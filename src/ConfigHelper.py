@@ -7,6 +7,7 @@
 """
 
 import json
+import os
 
 
 class ConfigHelper:
@@ -15,7 +16,7 @@ class ConfigHelper:
     @staticmethod
     def initialize():
         if ConfigHelper.CONFIG is None:
-            with open("config.json") as f:
+            with open(os.path.dirname(__file__) + "/" + os.path.pardir + "/config.json") as f:
                 ConfigHelper.CONFIG = json.load(f)
 
     @staticmethod
