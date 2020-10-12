@@ -5,7 +5,7 @@ It uses pings in the local network to get the state of a desired device (e.g. a 
 
 This software is not developed by Tado itself.
 
-###Installation
+### Installation
 
 The software requires Python 3 (tested with 3.8 under MacOS and Raspbian).
 
@@ -15,7 +15,7 @@ To install the required pip packages run
 python3 -m pip install -r requirements.txt
 ```
 
-###Configuration
+### Configuration
 
 The `config.json` contains all tweakable parameters.
 
