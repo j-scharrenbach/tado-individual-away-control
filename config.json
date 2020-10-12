@@ -1,0 +1,18 @@
+{
+  "username": "<your-username>",
+  "password": "<your-password>",
+  "away_temperature": 16,
+  "interval": 10,
+  "max_ping_cnt": 5,
+  "client_state_history_len": 30,
+  "min_home_success_pings": 1,
+  "print_timestamp": true,
+  "rules": [
+    {
+      "zone_id": 6,
+      "ips": [
+        "192.168.178.100"
+      ]
+    }
+  ]
+}
