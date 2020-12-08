@@ -15,6 +15,10 @@ To install the required pip packages run
 python3 -m pip install -r requirements.txt
 ```
 
+To setup `tado-individual-away-control` as a systemd service (and automatically start at boot) place the files to the supposed folder and execute the `setup-service.sh` script. Beforehand the configuration step below needs to be done (otherwise the service will crash)!
+To get the state of the service run `sudo systemctl status tado-control`, to restart the service run `sudo systemctl restart tado-control`.
+Tested on RasperryPi 3 B (Raspbian GNU/Linux 10 (buster)).
+
 ### Configuration
 
 The `config.json` contains all tweakable parameters.
