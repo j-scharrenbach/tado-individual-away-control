@@ -29,7 +29,10 @@ Some values are already set up, other ones need to be entered manually (username
 {
   "username": "<your-username>",
   "password": "<your-password>",
-  "away_temperature": <int, temperature to be set when away>,
+  "away_temperature": <int, temperature to be set when in away mode>,
+  "allow_deep_sleep": <true/false, allow/disallow deep sleep>,
+  "deep_sleep_after_hours": <float, time in hours after which deep sleep gets enabled>,
+  "deep_sleep_temperature": <int, temperature to be set when in deep sleep mode>,
   "interval": <int, interval of ping events in seconds>,
   "max_ping_cnt": <int, number of consecutive pings>,
   "client_state_history_len": <int, number of ping events to evaluate for state>,
@@ -37,7 +40,7 @@ Some values are already set up, other ones need to be entered manually (username
   "print_timestamp": <true/false, print the timestamps in terminal (set to false for privacy reasons)>,
   "rules": [
     {
-      "zone_id": <int, id of the zone>,
+      "zone_id": <int, id of the zone OR list<int>, zone ids OR "default">,
       "ips": [
         "<list of ips for the desired zone>"
       ]
@@ -47,7 +50,12 @@ Some values are already set up, other ones need to be entered manually (username
 ```
 
 Each rule is defined by the zone id and a list of the devices to look for (make sure the devices have a static ip).
+
+The `zone_id` field can be a single zone id, a list of zone ids (e.g. `[1, 2, 3]`) or the string `"default"`, which applies to all zones no rule is defined for.
+Keep in mind: There can only be one rule per zone, otherwise the application will terminate.
+
 Multiple rules aswell as multiple devices are possible. Only if all devices are not available, the state of the zone is away.
+The `deep sleep mode` is acitvated, when a zone is set to away mode for `deep_sleep_after_hours` number of hours. Then the temperature is set to `deep_sleep_temperature`.
 
 To list all zones run
 ```pip packets

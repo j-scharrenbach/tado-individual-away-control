@@ -2,7 +2,7 @@
     File name: TadoWrapper.py
     Author: Jannik Scharrenbach
     Date created: 10/10/2020
-    Date last modified: 10/12/2020
+    Date last modified: 09/01/2021
     Python Version: 3.8
 """
 
@@ -49,7 +49,7 @@ class TadoWrapper:
             try:
                 self.__t.setZoneOverlay(zone=zone, overlayMode="MANUAL", setTemp=temperature)
                 success = True
-                LoggingHelper.log("Zone {} turned off.".format(zone))
+                LoggingHelper.log("Zone {} set to {} degrees.".format(zone, temperature))
             except (ConnectionError, r_exc.ReadTimeout):
                 LoggingHelper.log("Unable to set zone value.")
                 self.__reconnect()
@@ -60,7 +60,7 @@ class TadoWrapper:
             try:
                 self.__t.resetZoneOverlay(zone=zone)
                 success = True
-                LoggingHelper.log("Zone {} turned on.".format(zone))
+                LoggingHelper.log("Zone {} reset to tado schedule.".format(zone))
             except (ConnectionError, r_exc.ReadTimeout):
                 LoggingHelper.log("Unable to reset zone.")
                 self.__reconnect()
