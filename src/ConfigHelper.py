@@ -115,10 +115,6 @@ class ConfigHelper:
         return bool(ConfigHelper.__CONFIG["allow_deep_sleep"])
 
     @staticmethod
-    def get_allow_deep_sleep():
-        return bool(ConfigHelper.__CONFIG["allow_deep_sleep"])
-
-    @staticmethod
     def get_deep_sleep_after_seconds():
         return float(ConfigHelper.__CONFIG["deep_sleep_after_hours"]) * 60 * 60
 
