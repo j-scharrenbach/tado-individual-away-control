@@ -148,12 +148,3 @@ class App:
 
             duration = time.time() - t_start
             time.sleep(max(ConfigHelper.get_interval() - duration, 0))
-
-
-if __name__ == "__main__":
-    app = App()
-    if len(sys.argv) == 2 and sys.argv[1] == "--list-zones":
-        app.list_zones()
-    else:
-        LoggingHelper.log("Application running.")
-        app.run()
