@@ -1,5 +1,13 @@
 #!/bin/bash
 
+cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null
+
+if test ! -f "config.json"; then
+    echo "config.json not found."
+    echo "Please set up the configuration according to your tado setup. Read README.md for further information."
+    exit 1
+fi
+
 echo "Installing pip requirements..."
 python3 -m pip install -r requirements.txt  || { echo 'pip install failed' ; exit 1; }
 echo "Preparing service..."

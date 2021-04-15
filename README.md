@@ -21,7 +21,7 @@ Tested on RasperryPi 3 B (Raspbian GNU/Linux 10 (buster)).
 
 ### Configuration
 
-The `config.json` contains all tweakable parameters.
+The `config.json` contains all tweakable parameters. Before first run, the config-sample.json needs to be adapted to your personal tado setup and renamed to config.json!
 
 Some values are already set up, other ones need to be entered manually (username and password; rules).
 
