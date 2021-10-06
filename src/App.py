@@ -26,59 +26,42 @@ class App:
         self.__zone_off_time = dict()
         ConfigHelper.initialize_zones(self.__tado.get_zones())
 
-        self.__client_states = None
-        self.__client_state_history = list()
+    def list_devices(self):
+        # print all zones of the home
+        print("Devices in home:")
+        for z in self.__tado.get_devices():
+            print("\"" + z["name"] + "\"", end="")
+            if not z["geo_tracking"]:
+                print(" (no geo tracking enabled!)")
+            else:
+                print("")
 
     def list_zones(self):
         # print all zones of the home
         print("Zones in home:")
+        print(self.__tado.get_device_athome_states())
         for z in self.__tado.get_zones():
             print(z["id"], ":\t", z["name"])
-
-    def __ping(self, ip):
-        result = False
-        for i in range(0, ConfigHelper.get_max_ping_cnt()):
-            try:
-                result = ping3.ping(ip, timeout=3) is not None
-            except OSError:
-                pass
-            if result:
-                break
-        return result
 
     def __get_client_states(self):
         # returns the client states (available via ping or not)
         # checks if consecutive pings fail and set to away after defined number of pings
-        new_c_states = {ip: cs.UNKNOWN for ip in ConfigHelper.get_ips()}
-
-        for ip in new_c_states.keys():
-            r = self.__ping(ip)
-
-            if r:
-                new_c_states[ip] = cs.HOME
-            else:
-                new_c_states[ip] = cs.AWAY
-
-        if self.__client_states is None:
-            self.__client_states = new_c_states
-
-        # add to history and clean up
-        self.__client_state_history.append(new_c_states)
-        if len(self.__client_state_history) > ConfigHelper.get_client_state_history_len():
-            self.__client_state_history.pop(0)
+        device_states = self.__tado.get_device_athome_states()
+        client_states = {}
 
         # calculate presence for each ip
-        for ip in new_c_states.keys():
-            home_cnt = sum([h[ip] == cs.HOME for h in self.__client_state_history])
-
-            if home_cnt >= ConfigHelper.get_min_home_success_pings():
-                # home
-                self.__client_states[ip] = cs.HOME
+        for d in ConfigHelper.get_devices():
+            if d in device_states:
+                state = device_states[d]
+                print(d + ":", state)
+                if state["stale"]:
+                    client_states[d] = cs.HOME if ConfigHelper.get_default_stale_state() == "HOME" else cs.AWAY
+                else:
+                    client_states[d] = cs.HOME if state["at_home"] else cs.AWAY
             else:
-                # away and steady
-                self.__client_states[ip] = cs.AWAY
+                raise Exception("Unknown device {}".format(d))
 
-        return self.__client_states
+        return client_states
 
     def __get_desired_zone_states(self, client_states):
         # returns the desired states of all zones defined in the config.json
@@ -87,7 +70,7 @@ class App:
         clients_home = set(c[0] for c in client_states.items() if c[1] == cs.HOME)
 
         for r in ConfigHelper.get_rules():
-            if len(set(r["ips"]).intersection(clients_home)) != 0:
+            if len(set(r["device"]).intersection(clients_home)) != 0:
                 z_states[r["zone_id"]] = zs.ON
                 if r["zone_id"] in self.__zone_off_time.keys():
                     # remove from off time if turned on

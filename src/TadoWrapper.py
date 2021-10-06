@@ -43,6 +43,10 @@ class TadoWrapper:
         data = self.__t.getZones()
         return [{"id": d["id"], "name": d["name"]} for d in data]
 
+    def get_devices(self):
+        data = self.__t.getMobileDevices()
+        return [{"name": d["name"], "id": d["id"], "geo_tracking": d["settings"]["geoTrackingEnabled"]} for d in data]
+
     def set_zone(self, zone, temperature):
         success = False
         while not success:
@@ -64,3 +68,7 @@ class TadoWrapper:
             except (ConnectionError, r_exc.ReadTimeout):
                 LoggingHelper.log("Unable to reset zone.")
                 self.__reconnect()
+
+    def get_device_athome_states(self):
+        data = self.__t.getMobileDevices()
+        return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if "location" in d}

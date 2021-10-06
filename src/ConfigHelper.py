@@ -2,7 +2,7 @@
     File name: ConfigHelper.py
     Author: Jannik Scharrenbach
     Date created: 10/10/2020
-    Date last modified: 15/04/2021
+    Date last modified: 09/01/2021
     Python Version: 3.8
 """
 
@@ -16,16 +16,13 @@ class ConfigHelper:
 
     __RULES = None
     __ZONES = None
+    __DEVICES = None
 
     @staticmethod
     def initialize():
         if ConfigHelper.__CONFIG is None:
-            try:
-                with open(os.path.dirname(__file__) + "/" + os.path.pardir + "/config.json") as f:
-                    ConfigHelper.__CONFIG = json.load(f)
-            except FileNotFoundError:
-                print("ERROR: config.json not found.\nPlease set up the configuration according to your tado setup. Read README.md for further information.")
-                sys.exit(1)
+            with open(os.path.dirname(__file__) + "/" + os.path.pardir + "/config.json") as f:
+                ConfigHelper.__CONFIG = json.load(f)
 
     @staticmethod
     def initialize_zones(zones):
@@ -37,14 +34,19 @@ class ConfigHelper:
         return ConfigHelper.__CONFIG["username"], ConfigHelper.__CONFIG["password"]
 
     @staticmethod
-    def get_ips():
-        ips = set()
+    def get_default_stale_state():
+        return ConfigHelper.__CONFIG["default_stale_state"]
 
-        for r in ConfigHelper.get_rules():
-            for ip in r["ips"]:
-                ips.add(ip)
+    @staticmethod
+    def get_devices():
+        if not ConfigHelper.__DEVICES:
+            devices = set()
+            for r in ConfigHelper.get_rules():
+                for d in r["device"]:
+                    devices.add(d)
 
-        return list(ips)
+            ConfigHelper.__DEVICES = list(devices)
+        return ConfigHelper.__DEVICES
 
     @staticmethod
     def get_rules():
@@ -113,6 +115,10 @@ class ConfigHelper:
     @staticmethod
     def get_print_timestamp():
         return ConfigHelper.__CONFIG["print_timestamp"]
+
+    @staticmethod
+    def get_allow_deep_sleep():
+        return bool(ConfigHelper.__CONFIG["allow_deep_sleep"])
 
     @staticmethod
     def get_allow_deep_sleep():

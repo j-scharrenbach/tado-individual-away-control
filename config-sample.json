@@ -6,15 +6,13 @@
   "deep_sleep_after_hours": 12.0,
   "deep_sleep_temperature": 14,
   "interval": 10,
-  "max_ping_cnt": 2,
-  "client_state_history_len": 60,
-  "min_home_success_pings": 2,
+  "default_stale_state": "AWAY",
   "print_timestamp": true,
   "rules": [
     {
       "zone_id": 0,
-      "ips": [
-        "<your-ips>"
+      "device": [
+        "<your-device-name>"
       ]
     }
   ]
