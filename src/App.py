@@ -12,9 +12,6 @@ from src.LoggingHelper import LoggingHelper
 from src.ClientState import ClientState as cs
 from src.ZoneState import ZoneState as zs
 
-import ping3
-
-import sys
 import time
 
 
