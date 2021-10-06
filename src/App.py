@@ -21,6 +21,7 @@ class App:
         self.__tado = TadoWrapper()
         self.__zone_states = None
         self.__zone_off_time = dict()
+        self.__last_states = {}
         ConfigHelper.initialize_zones(self.__tado.get_zones())
 
     def list_devices(self):
@@ -51,7 +52,16 @@ class App:
                 state = device_states[d]
                 if state["stale"]:
                     # set to default_stale_state if device is stale
-                    client_states[d] = cs.HOME if ConfigHelper.get_default_stale_state() == "HOME" else cs.AWAY
+                    default_state = ConfigHelper.get_default_stale_state()
+                    if default_state == "SUSTAIN":
+                        if d in self.__last_states:
+                            client_states[d] = self.__last_states[d]
+                        else:
+                            client_states[d] = cs.HOME
+                    elif default_state == "AWAY":
+                        client_states[d] = cs.AWAY
+                    else:
+                        client_states[d] = cs.HOME
                 else:
                     client_states[d] = cs.HOME if state["at_home"] else cs.AWAY
             else:

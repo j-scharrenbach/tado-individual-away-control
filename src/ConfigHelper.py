@@ -18,6 +18,8 @@ class ConfigHelper:
     __ZONES = None
     __DEVICES = None
 
+    MIN_INTERVAL = 15
+
     @staticmethod
     def initialize():
         if ConfigHelper.__CONFIG is None:
@@ -90,7 +92,7 @@ class ConfigHelper:
 
     @staticmethod
     def get_interval():
-        return int(ConfigHelper.__CONFIG["interval"])
+        return max(ConfigHelper.MIN_INTERVAL, int(ConfigHelper.__CONFIG["interval"]))
 
     @staticmethod
     def get_zones():

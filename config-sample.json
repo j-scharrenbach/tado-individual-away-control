@@ -6,7 +6,7 @@
   "deep_sleep_after_hours": 12.0,
   "deep_sleep_temperature": 14,
   "interval": 30,
-  "default_stale_state": "HOME",
+  "default_stale_state": "SUSTAIN",
   "print_timestamp": true,
   "rules": [
     {
