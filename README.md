@@ -52,18 +52,20 @@ Each rule is defined by the zone id and a list of the devices to look for. The s
 The `zone_id` field can be a single zone id, a list of zone ids (e.g. `[1, 2, 3]`) or the string `"default"`, which applies to all zones no rule is defined for.
 Keep in mind: There can only be one rule per zone, otherwise the application will terminate.
 
-Multiple rules aswell as multiple devices are possible. Only if all devices are not available, the state of the zone is away.
-The `deep sleep mode` is acitvated, when a zone is set to away mode for `deep_sleep_after_hours` number of hours. Then the temperature is set to `deep_sleep_temperature`.
-
 To list all zones run
 ```
 python3 start.py --list-zones
 ```
 
+The `device` field needs to be a list of the names of the devices which need to be away from home to activate the corresponsing rule. The names must exactly match those from the Tado configuration. Multiple devices need to be separated via comma.
+
 To list all devices run
 ```
 python3 start.py --list-zones
 ```
+
+Multiple rules aswell as multiple devices are possible. Only if all devices are not available, the state of the zone is away.
+The `deep sleep mode` is acitvated, when a zone is set to away mode for `deep_sleep_after_hours` number of hours. Then the temperature is set to `deep_sleep_temperature`.
 
 The `default_stale_state` defines how the system behaves if a device gets stale (is not responding). `"SUSTAIN"` takes the last known state and continues the corresponding behavior. If the device has (or has not) been at home, is is assumed that the state did not change. `"HOME"` always sets the state to `at_home = true` and `"AWAY"` sets the state to `at_home = false`.
 
