@@ -67,6 +67,8 @@ class App:
             else:
                 raise Exception("Unknown device {}".format(d))
 
+        self.__last_states = client_states
+
         return client_states
 
     def __get_desired_zone_states(self, client_states):
