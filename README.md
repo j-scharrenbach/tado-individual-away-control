@@ -65,7 +65,7 @@ To list all devices run
 python3 start.py --list-zones
 ```
 
-To run the application simply start the `start.py` with sudo rights (those are needed for the pings).
+To run the application simply start the `start.py`.
 
 ### Privacy notes
 

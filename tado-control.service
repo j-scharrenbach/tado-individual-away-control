@@ -4,7 +4,7 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-User=root
+User=pi
 ExecStart=/usr/bin/python3 {INSTALL_DIR}/start.py
 Restart=on-failure
 RestartSec=10
