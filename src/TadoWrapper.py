@@ -2,7 +2,7 @@
     File name: TadoWrapper.py
     Author: Jannik Scharrenbach
     Date created: 10/10/2020
-    Date last modified: 09/01/2021
+    Date last modified: 06/10/2021
     Python Version: 3.8
 """
 
@@ -70,5 +70,14 @@ class TadoWrapper:
                 self.__reconnect()
 
     def get_device_athome_states(self):
-        data = self.__t.getMobileDevices()
+        success = False
+        data = None
+        while not success:
+            try:
+                data = self.__t.getMobileDevices()
+                success = True
+            except (ConnectionError, r_exc.ReadTimeout):
+                LoggingHelper.log("Unable to get device states.")
+                self.__reconnect()
+
         return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if "location" in d}

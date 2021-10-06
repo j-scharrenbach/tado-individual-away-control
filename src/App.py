@@ -2,7 +2,7 @@
     File name: App.py
     Author: Jannik Scharrenbach
     Date created: 10/10/2020
-    Date last modified: 09/01/2021
+    Date last modified: 06/10/2021
     Python Version: 3.8
 """
 
