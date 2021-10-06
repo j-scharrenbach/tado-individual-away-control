@@ -53,7 +53,6 @@ class App:
         for d in ConfigHelper.get_devices():
             if d in device_states:
                 state = device_states[d]
-                print(d + ":", state)
                 if state["stale"]:
                     client_states[d] = cs.HOME if ConfigHelper.get_default_stale_state() == "HOME" else cs.AWAY
                 else:
