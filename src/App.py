@@ -24,7 +24,7 @@ class App:
         ConfigHelper.initialize_zones(self.__tado.get_zones())
 
     def list_devices(self):
-        # print all zones of the home
+        # print all devices connected to the home
         print("Devices in home:")
         for z in self.__tado.get_devices():
             print("\"" + z["name"] + "\"", end="")
@@ -41,16 +41,16 @@ class App:
             print(z["id"], ":\t", z["name"])
 
     def __get_client_states(self):
-        # returns the client states (available via ping or not)
-        # checks if consecutive pings fail and set to away after defined number of pings
+        # returns the client states (at home or not)
         device_states = self.__tado.get_device_athome_states()
         client_states = {}
 
-        # calculate presence for each ip
+        # calculate presence for each device
         for d in ConfigHelper.get_devices():
             if d in device_states:
                 state = device_states[d]
                 if state["stale"]:
+                    # set to default_stale_state if device is stale
                     client_states[d] = cs.HOME if ConfigHelper.get_default_stale_state() == "HOME" else cs.AWAY
                 else:
                     client_states[d] = cs.HOME if state["at_home"] else cs.AWAY

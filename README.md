@@ -34,7 +34,7 @@ Some values are already set up, other ones need to be entered manually (username
   "deep_sleep_after_hours": <float, time in hours after which deep sleep gets enabled>,
   "deep_sleep_temperature": <int, temperature to be set when in deep sleep mode>,
   "interval": <int, interval in seconds>,
-  "default_stale_state": "HOME",
+  "default_stale_state": <"HOME" or "AWAY", value to consider the device as if it is stale>,
   "print_timestamp": <true/false, print the timestamps in terminal (set to false for privacy reasons)>,
   "rules": [
     {
