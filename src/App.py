@@ -37,7 +37,6 @@ class App:
     def list_zones(self):
         # print all zones of the home
         print("Zones in home:")
-        print(self.__tado.get_device_athome_states())
         for z in self.__tado.get_zones():
             print(z["id"], ":\t", z["name"])
 
