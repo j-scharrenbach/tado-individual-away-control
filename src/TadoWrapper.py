@@ -35,8 +35,9 @@ class TadoWrapper:
                 self.__connect()
                 connected = True
                 LoggingHelper.log("Connection to Tado established.")
-            except (ConnectionError, r_exc.ReadTimeout, r_exc.ConnectionError, r_exc.ConnectTimeout):
+            except r_exc.RequestException as e:
                 LoggingHelper.log("Connection to Tado failed. Trying again in {} seconds.".format(TadoWrapper.CONNECTION_RETRY_INTERVAL))
+                LoggingHelper.log(e)
                 time.sleep(TadoWrapper.CONNECTION_RETRY_INTERVAL)
 
     def get_zones(self):
@@ -54,8 +55,9 @@ class TadoWrapper:
                 self.__t.setZoneOverlay(zone=zone, overlayMode="MANUAL", setTemp=temperature)
                 success = True
                 LoggingHelper.log("Zone {} set to {} degrees.".format(zone, temperature))
-            except (ConnectionError, r_exc.ReadTimeout):
-                LoggingHelper.log("Unable to set zone value.")
+            except r_exc.RequestException as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
                 self.__reconnect()
 
     def reset_zone(self, zone):
@@ -65,8 +67,9 @@ class TadoWrapper:
                 self.__t.resetZoneOverlay(zone=zone)
                 success = True
                 LoggingHelper.log("Zone {} reset to tado schedule.".format(zone))
-            except (ConnectionError, r_exc.ReadTimeout):
-                LoggingHelper.log("Unable to reset zone.")
+            except r_exc.RequestException as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
                 self.__reconnect()
 
     def get_device_athome_states(self):
@@ -76,8 +79,9 @@ class TadoWrapper:
             try:
                 data = self.__t.getMobileDevices()
                 success = True
-            except (ConnectionError, r_exc.ReadTimeout):
+            except r_exc.RequestException as e:
                 LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
                 self.__reconnect()
 
         return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if "location" in d}
