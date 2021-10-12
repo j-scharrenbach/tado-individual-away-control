@@ -22,6 +22,8 @@ class App:
         self.__zone_states = None
         self.__zone_off_time = dict()
         self.__last_states = {}
+        self.__geofencing_locked = None
+
         ConfigHelper.initialize_zones(self.__tado.get_zones())
 
     def list_devices(self):
@@ -95,39 +97,58 @@ class App:
 
     def __update_heating(self):
         client_states = self.__get_client_states()
+        geofencing_locked = self.__tado.is_presence_locked()
 
         # parse rules an get desired states
         desired_zone_states = self.__get_desired_zone_states(client_states)
 
-        if self.__zone_states is None:
-            # invert for first run to initially turn everything to the desired state
-            self.__zone_states = {z[0]: zs.invert(z[1]) for z in desired_zone_states.items()}
+        if not geofencing_locked:
+            # geofencing not locked, contiue regular operation
+            if self.__geofencing_locked:
+                LoggingHelper.log("Geofencing unlocked, continue regular operation...")
 
-        # get zones to turn on
-        turn_on = set(z[0] for z in desired_zone_states.items() if z[1] == zs.ON).intersection(
-            set(z[0] for z in self.__zone_states.items() if z[1] != zs.ON))
+            if self.__zone_states is None:
+                # invert for first run to initially turn everything to the desired state
+                self.__zone_states = {z[0]: zs.invert(z[1]) for z in desired_zone_states.items()}
 
-        # get zones to turn off
-        turn_off = set(z[0] for z in desired_zone_states.items() if z[1] == zs.OFF).intersection(
-            set(z[0] for z in self.__zone_states.items() if z[1] != zs.OFF))
+            # get zones to turn on
+            turn_on = set(z[0] for z in desired_zone_states.items() if z[1] == zs.ON).intersection(
+                set(z[0] for z in self.__zone_states.items() if z[1] != zs.ON))
 
-        # get zones to turn to deep sleep mode
-        turn_deep_sleep = set(z[0] for z in desired_zone_states.items() if z[1] == zs.DEEP_SLEEP).intersection(
-            set(z[0] for z in self.__zone_states.items() if z[1] != zs.DEEP_SLEEP))
+            # get zones to turn off
+            turn_off = set(z[0] for z in desired_zone_states.items() if z[1] == zs.OFF).intersection(
+                set(z[0] for z in self.__zone_states.items() if z[1] != zs.OFF))
 
-        for zone in turn_on:
-            LoggingHelper.log("Switching zone {} to state 'on'... ".format(zone))
-            self.__tado.reset_zone(zone)
+            # get zones to turn to deep sleep mode
+            turn_deep_sleep = set(z[0] for z in desired_zone_states.items() if z[1] == zs.DEEP_SLEEP).intersection(
+                set(z[0] for z in self.__zone_states.items() if z[1] != zs.DEEP_SLEEP))
 
-        for zone in turn_off:
-            LoggingHelper.log("Switching zone {} to state 'off'... ".format(zone))
-            self.__tado.set_zone(zone, ConfigHelper.get_away_temperature())
+            for zone in turn_on:
+                LoggingHelper.log("Switching zone {} to state 'on'... ".format(zone))
+                self.__tado.reset_zone(zone)
 
-        for zone in turn_deep_sleep:
-            LoggingHelper.log("Switching zone {} to state 'deep sleep'... ".format(zone))
-            self.__tado.set_zone(zone, ConfigHelper.get_deep_sleep_temperature())
+            for zone in turn_off:
+                LoggingHelper.log("Switching zone {} to state 'off'... ".format(zone))
+                self.__tado.set_zone(zone, ConfigHelper.get_away_temperature())
 
-        self.__zone_states = desired_zone_states
+            for zone in turn_deep_sleep:
+                LoggingHelper.log("Switching zone {} to state 'deep sleep'... ".format(zone))
+                self.__tado.set_zone(zone, ConfigHelper.get_deep_sleep_temperature())
+
+            self.__zone_states = desired_zone_states
+
+        elif not self.__geofencing_locked and geofencing_locked:
+            # reset all zones which are set to off
+            if self.__zone_states:
+                off_zone_ids = [z[0] for z in self.__zone_states.items() if z[1] != zs.OFF]
+                
+                LoggingHelper.log("Geofencing locked, resetting all zones which are turned off...")
+                for zone_id in off_zone_ids:
+                    self.__tado.reset_zone(zone_id)
+            
+            LoggingHelper.log("Pausing until geofencing is unlocked.")
+
+        self.__geofencing_locked = geofencing_locked
 
     def run(self):
         while 1:

@@ -48,7 +48,6 @@ class TadoWrapper:
 
     def get_devices(self):
         data = self.__t.getMobileDevices()
-        print(self.__t.getHomeState())
         return [{"name": d["name"], "id": d["id"], "geo_tracking": d["settings"]["geoTrackingEnabled"]} for d in data]
 
     def set_zone(self, zone, temperature):
@@ -90,3 +89,21 @@ class TadoWrapper:
                 self.__reconnect()
 
         return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if "location" in d}
+
+    def is_presence_locked(self):
+        success = False
+        data = None
+        result = False
+        while not success:
+            try:
+                data = self.__t.getHomeState()
+                if data == None:
+                    raise TadoWrapperException("Mobile device data is None. Are any devices configured within Tado?")
+                success = True
+            except (r_exc.RequestException, TadoWrapperException) as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
+                self.__reconnect()
+        if "presenceLocked" in data:
+            result = data["presenceLocked"]
+        return result
