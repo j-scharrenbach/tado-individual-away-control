@@ -14,6 +14,8 @@ from src.LoggingHelper import LoggingHelper
 import time
 from requests import exceptions as r_exc
 
+class TadoWrapperException(Exception):
+    pass
 
 class TadoWrapper:
     CONNECTION_RETRY_INTERVAL = 60
@@ -46,6 +48,7 @@ class TadoWrapper:
 
     def get_devices(self):
         data = self.__t.getMobileDevices()
+        print(self.__t.getHomeState())
         return [{"name": d["name"], "id": d["id"], "geo_tracking": d["settings"]["geoTrackingEnabled"]} for d in data]
 
     def set_zone(self, zone, temperature):
@@ -78,8 +81,10 @@ class TadoWrapper:
         while not success:
             try:
                 data = self.__t.getMobileDevices()
+                if data == None:
+                    raise TadoWrapperException("Mobile device data is None. Are any devices configured within Tado?")
                 success = True
-            except r_exc.RequestException as e:
+            except (r_exc.RequestException, TadoWrapperException) as e:
                 LoggingHelper.log("Unable to get device states.")
                 LoggingHelper.log(e)
                 self.__reconnect()
