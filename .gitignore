@@ -27,3 +27,5 @@ Temporary Items
 .apdisk
 
 __pycache__
+.venv
+config.json
