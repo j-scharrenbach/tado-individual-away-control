@@ -1,7 +1,7 @@
 # tado-individual-away-control
 
 `tado-individual-away-control` allows to control the away state of your tado heating control by individual users.
-It uses pings in the local network to get the state of a desired device (e.g. a smartphone).
+It uses the tado api to get the home state of a desired device (e.g. a smartphone).
 
 This software is not developed by Tado itself.
 
@@ -30,41 +30,46 @@ Some values are already set up, other ones need to be entered manually (username
   "username": "<your-username>",
   "password": "<your-password>",
   "away_temperature": <int, temperature to be set when in away mode>,
-  "allow_deep_sleep": <true/false, allow/disallow deep sleep>,
+  "allow_deep_sleep": <true/false, allow/disallow deep sleep, see below>,
   "deep_sleep_after_hours": <float, time in hours after which deep sleep gets enabled>,
   "deep_sleep_temperature": <int, temperature to be set when in deep sleep mode>,
-  "interval": <int, interval of ping events in seconds>,
-  "max_ping_cnt": <int, number of consecutive pings>,
-  "client_state_history_len": <int, number of ping events to evaluate for state>,
-  "min_home_success_pings": <int, minimal number of successfull pings to set state to home>,
+  "interval": <int, interval in seconds, minimum 15 seconds>,
+  "default_stale_state": <"STUSTAIN", "HOME" or "AWAY", value to consider the device as if it is stale, see below>,
   "print_timestamp": <true/false, print the timestamps in terminal (set to false for privacy reasons)>,
   "rules": [
     {
-      "zone_id": <int, id of the zone OR list<int>, zone ids OR "default">,
-      "ips": [
-        "<list of ips for the desired zone>"
+      "zone_id": <int, id of the zone OR list<int>, zone ids OR "default", see below>,
+      "device": [
+        "<list of names of the devices to listen for this zone(s), see below>"
       ]
     }
   ]
 }
 ```
 
-Each rule is defined by the zone id and a list of the devices to look for (make sure the devices have a static ip).
+Each rule is defined by the zone id and a list of the devices to look for. The script receives the home state of each device in the defined interval and sets the zones accordingly.
 
 The `zone_id` field can be a single zone id, a list of zone ids (e.g. `[1, 2, 3]`) or the string `"default"`, which applies to all zones no rule is defined for.
 Keep in mind: There can only be one rule per zone, otherwise the application will terminate.
 
-Multiple rules aswell as multiple devices are possible. Only if all devices are not available, the state of the zone is away.
-The `deep sleep mode` is acitvated, when a zone is set to away mode for `deep_sleep_after_hours` number of hours. Then the temperature is set to `deep_sleep_temperature`.
-
 To list all zones run
-```pip packets
+```
 python3 start.py --list-zones
 ```
 
-The time needed to recognize a device as away is determined by `interval * client_state_history_len`.
+The `device` field needs to be a list of the names of the devices which need to be away from home to activate the corresponsing rule. The names must exactly match those from the Tado configuration. Multiple devices need to be separated via comma.
 
-To run the application simply start the `start.py` with sudo rights (those are needed for the pings).
+To list all devices run
+```
+python3 start.py --list-zones
+```
+
+Multiple rules aswell as multiple devices are possible. Only if all devices are not available, the state of the zone is away.
+The `deep sleep mode` is acitvated, when a zone is set to away mode for `deep_sleep_after_hours` number of hours. Then the temperature is set to `deep_sleep_temperature`.
+
+The `default_stale_state` defines how the system behaves if a device gets stale (is not responding). `"SUSTAIN"` takes the last known state and continues the corresponding behavior. If the device has (or has not) been at home, is is assumed that the state did not change. `"HOME"` always sets the state to `at_home = true` and `"AWAY"` sets the state to `at_home = false`.
+
+To run the application simply start the `start.py`.
 
 ### Privacy notes
 

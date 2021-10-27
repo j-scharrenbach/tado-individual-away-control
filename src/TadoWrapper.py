@@ -2,7 +2,7 @@
     File name: TadoWrapper.py
     Author: Jannik Scharrenbach
     Date created: 10/10/2020
-    Date last modified: 09/01/2021
+    Date last modified: 06/10/2021
     Python Version: 3.8
 """
 
@@ -14,6 +14,8 @@ from src.LoggingHelper import LoggingHelper
 import time
 from requests import exceptions as r_exc
 
+class TadoWrapperException(Exception):
+    pass
 
 class TadoWrapper:
     CONNECTION_RETRY_INTERVAL = 60
@@ -35,13 +37,18 @@ class TadoWrapper:
                 self.__connect()
                 connected = True
                 LoggingHelper.log("Connection to Tado established.")
-            except (ConnectionError, r_exc.ReadTimeout, r_exc.ConnectionError, r_exc.ConnectTimeout):
+            except r_exc.RequestException as e:
                 LoggingHelper.log("Connection to Tado failed. Trying again in {} seconds.".format(TadoWrapper.CONNECTION_RETRY_INTERVAL))
+                LoggingHelper.log(e)
                 time.sleep(TadoWrapper.CONNECTION_RETRY_INTERVAL)
 
     def get_zones(self):
         data = self.__t.getZones()
         return [{"id": d["id"], "name": d["name"]} for d in data]
+
+    def get_devices(self):
+        data = self.__t.getMobileDevices()
+        return [{"name": d["name"], "id": d["id"], "geo_tracking": d["settings"]["geoTrackingEnabled"]} for d in data]
 
     def set_zone(self, zone, temperature):
         success = False
@@ -50,8 +57,9 @@ class TadoWrapper:
                 self.__t.setZoneOverlay(zone=zone, overlayMode="MANUAL", setTemp=temperature)
                 success = True
                 LoggingHelper.log("Zone {} set to {} degrees.".format(zone, temperature))
-            except (ConnectionError, r_exc.ReadTimeout):
-                LoggingHelper.log("Unable to set zone value.")
+            except r_exc.RequestException as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
                 self.__reconnect()
 
     def reset_zone(self, zone):
@@ -61,6 +69,41 @@ class TadoWrapper:
                 self.__t.resetZoneOverlay(zone=zone)
                 success = True
                 LoggingHelper.log("Zone {} reset to tado schedule.".format(zone))
-            except (ConnectionError, r_exc.ReadTimeout):
-                LoggingHelper.log("Unable to reset zone.")
+            except r_exc.RequestException as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
                 self.__reconnect()
+
+    def get_device_athome_states(self):
+        success = False
+        data = None
+        while not success:
+            try:
+                data = self.__t.getMobileDevices()
+                if data == None:
+                    raise TadoWrapperException("Mobile device data is None. Are any devices configured within Tado?")
+                success = True
+            except (r_exc.RequestException, TadoWrapperException) as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
+                self.__reconnect()
+
+        return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if "location" in d}
+
+    def is_presence_locked(self):
+        success = False
+        data = None
+        result = False
+        while not success:
+            try:
+                data = self.__t.getHomeState()
+                if data == None:
+                    raise TadoWrapperException("Mobile device data is None. Are any devices configured within Tado?")
+                success = True
+            except (r_exc.RequestException, TadoWrapperException) as e:
+                LoggingHelper.log("Unable to get device states.")
+                LoggingHelper.log(e)
+                self.__reconnect()
+        if "presenceLocked" in data:
+            result = data["presenceLocked"]
+        return result

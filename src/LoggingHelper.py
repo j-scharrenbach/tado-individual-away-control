@@ -18,4 +18,4 @@ class LoggingHelper:
             log_msg = "{}\t{}".format(datetime.datetime.now(), msg)
         else:
             log_msg = msg
-        print(log_msg, end=end)
+        print(log_msg, end=end, flush=True)
