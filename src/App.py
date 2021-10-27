@@ -2,7 +2,7 @@
     File name: App.py
     Author: Jannik Scharrenbach
     Date created: 10/10/2020
-    Date last modified: 06/10/2021
+    Date last modified: 27/10/2021
     Python Version: 3.8
 """
 
@@ -140,7 +140,7 @@ class App:
         elif not self.__geofencing_locked and geofencing_locked:
             # reset all zones which are set to off
             if self.__zone_states:
-                off_zone_ids = [z[0] for z in self.__zone_states.items() if z[1] != zs.OFF]
+                off_zone_ids = [z[0] for z in self.__zone_states.items() if z[1] == zs.OFF]
                 
                 LoggingHelper.log("Geofencing locked, resetting all zones which are turned off...")
                 for zone_id in off_zone_ids:
