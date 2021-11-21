@@ -80,7 +80,7 @@ class TadoWrapper:
         while not success:
             try:
                 data = self.__t.getMobileDevices()
-                if data == None:
+                if data is None:
                     raise TadoWrapperException("Mobile device data is None. Are any devices configured within Tado?")
                 success = True
             except (r_exc.RequestException, TadoWrapperException) as e:
@@ -88,7 +88,7 @@ class TadoWrapper:
                 LoggingHelper.log(e)
                 self.__reconnect()
 
-        return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if "location" in d}
+        return {d["name"]: {"at_home": d["location"]["atHome"], "stale": d["location"]["stale"]} for d in data if d is not None and  "location" in d}
 
     def is_presence_locked(self):
         success = False
